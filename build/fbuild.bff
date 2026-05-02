@@ -1,0 +1,29 @@
+//fbuild.bff - basic build definition
+Settings {}
+
+Compiler( 'gcc' )
+{
+    .Executable = '/usr/bin/g++'
+}
+
+ObjectList( 'renderer-obj' )
+{
+    .Compiler = 'gcc'
+    .CompilerInputFiles = '/buildpool/workspace/renderer.cpp'
+    .CompilerOutputPath = '/tmp/fbuild-out/'
+    .CompilerOptions = '%1 -o %2 -c'
+}
+
+ObjectList( 'network-obj' )
+{
+    .Compiler = 'gcc'
+    .CompilerInputFiles = '/buildpool/workspace/network.cpp'
+    .CompilerOutputPath = '/tmp/fbuild-out/'
+    .CompilerOptions = '%1 -o %2 -c'
+}
+
+Alias( 'all' )
+{
+    .Targets = { 'renderer-obj', 'network-obj' }
+}
+
