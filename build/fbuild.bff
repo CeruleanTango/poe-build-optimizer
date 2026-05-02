@@ -22,8 +22,38 @@ ObjectList( 'network-obj' )
     .CompilerOptions = '%1 -o %2 -c'
 }
 
+ObjectList ( 'audio-obj' )
+{
+    .Compiler = 'gcc'
+    .CompilerInputFiles = '/buildpool/workspace/audio.cpp'
+    .CompilerOutputPath = '/tmp/fbuild-out/'
+    .CompilerOptions = '%1 -o %2 -c'
+}
+
+ObjectList ('physics-obj' )
+{
+    .Compiler = 'gcc'
+    .CompilerInputFiles = '/buildpool/workspace/physics.cpp'
+    .CompilerOutputPath = '/tmp/fbuild-out/'
+    .CompilerOptions = '%1 -o %2 -c'
+}
+
+ObjectList ( 'ui-obj' )
+{
+    .Compiler = 'gcc'
+    .CompilerInputFiles = '/buildpool/workspace/ui.cpp'
+    .CompilerOutputPath = '/tmp/fbuild-out/'
+    .CompilerOptions = '%1 -o %2 -c'
+}
+
 Alias( 'all' )
 {
-    .Targets = { 'renderer-obj', 'network-obj' }
+    .Targets = {
+        'renderer-obj',
+        'network-obj',
+        'physics-obj',
+        'audio-obj',
+        'ui-obj'
+    }
 }
 
