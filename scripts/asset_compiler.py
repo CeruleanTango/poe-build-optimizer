@@ -32,8 +32,9 @@ def compile_all(changed_files=None):
 
     if changed_files is not None:
         targets = [
-            os.path.join(ASSET_DIR, f["file"])
+            f["path"]
             for f in changed_files
+            if f["file"].endswith((".png",".glsl",".obj"))
         ]
         print(f"Compiling {len(targets)} changed assets...")
     else:

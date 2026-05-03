@@ -71,7 +71,7 @@ def get_changed_files(snap_before, snap_after, filter_path=None):
                     # Only include files in filter_path
                     continue
                 filename = path.split("/")[-1]
-                changed.append({"file": filename, "change": interpret_change(change_type.strip())})
+                changed.append({"file": filename, "path": path.strip(), "change": interpret_change(change_type.strip())})
     return changed
 
 def run_asset_compile(post_snap):
