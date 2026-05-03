@@ -1,0 +1,1 @@
+PLACEHOLDER_SHADER:lighting:vertex+fragment
