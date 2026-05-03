@@ -109,45 +109,67 @@ def run_asset_compile(post_snap):
         "asset_build_time": total,
     }
 
+def mid_build_snapshot():
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return take_snapshot(f"mid-build-check-{timestamp}")
+
+def detect_mid_build_changes(pre_snap):
+    check_snap = mid_build_snapshot()
+    mid_build_changes = get_changed_files(pre_snap, check_snap)
+    subprocess.run(["sudo","zfs","destroy", check_snap], check=True)
+    return mid_build_changes
+
 def main():
     build_config = "/home/admin/poe-build-optimizer/build/fbuild.bff"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    pre_snap = read_last_snapshot(LAST_SNAPSHOT)
+    pre_build_snap = take_snapshot(f"pre-build-{timestamp}")
+    most_recent_snap = read_last_snapshot(LAST_SNAPSHOT)
 
     build_time, success = run_build(build_config)
-    post_snap = take_snapshot(f"post-build-{timestamp}")
-    write_last_snapshot(LAST_SNAPSHOT, post_snap)
+
+    mid_build_changes = detect_mid_build_changes(pre_build_snap)
 
     report = {
         "timestamp": timestamp,
         "build_time_seconds": build_time,
         "success":success,
-        "post_build_snap": post_snap,
     }
 
-    if None != pre_snap:
-        changed_files = get_changed_files(pre_snap, post_snap)
+    if mid_build_changes:
+        print(f"\nWARNING: {len(mid_build_changes)} files changed during the build")
+
+    if None != most_recent_snap:
+        changed_files = get_changed_files(most_recent_snap, pre_build_snap)
 
         report.update({
-            "pre_build_snap": pre_snap,
+            "pre_build_snap": pre_build_snap,
             "changed_files": changed_files,
         })
 
     print("\n---Asset Pipeline---")
-    asset_result = run_asset_compile(post_snap)
+    asset_result = run_asset_compile(pre_build_snap)
 
     report.update({
         "asset_pipeline":asset_result
     })
 
     total_build_time = build_time + asset_result["asset_build_time"]
+
+    if success:
+        write_last_snapshot(LAST_SNAPSHOT, pre_build_snap)
+        print(f"\nBuild Succeeded in {total_build_time}")
+        report.update({
+            "updated_snapshot": True,
+        })
+    else:
+        print(f"\nBuild Failed in {total_build_time}")
+
     total_changes = len(changed_files) + len(asset_result["assets_compiled"])
 
     with open("reports/latest.json", "w") as f:
         json.dump(report, f, indent=2)
 
-    print(f"\nBuild {'succeeded' if success else 'failed'} in {total_build_time}s")
     print(f"Changed files detected: {total_changes}")
     print("Report written to reports/latest.json")
 

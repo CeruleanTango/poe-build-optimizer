@@ -2,3 +2,5 @@ __pychache__/
 *.pyc
 reports/
 *.0
+build/*.fdb
+
